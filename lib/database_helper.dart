@@ -1,7 +1,6 @@
-import 'dart:io';
-import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
+
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -18,28 +17,61 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDatabase() async {
-    Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentsDirectory.path, "users.db");
-    return await openDatabase(path, version: 1, onCreate: _onCreate);
+    final databasesPath = await getDatabasesPath();
+    final path = join(databasesPath, 'yourdatabase.db');
+    return await openDatabase(
+      path,
+      version: 1,
+      onCreate: _onCreate,
+    );
   }
 
-  Future _onCreate(Database db, int version) async {
+  Future<void> _onCreate(Database db, int version) async {
     await db.execute('''
       CREATE TABLE users (
-        id INTEGER PRIMARY KEY,
-        name TEXT,
-        photo TEXT
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        name TEXT NOT NULL,
+        father_name TEXT,
+        address TEXT,
+        aadhar_no TEXT,
+        phone_no TEXT,
+        group_id TEXT,
+        photo TEXT,
+        id_front_photo TEXT,
+        id_back_photo TEXT
       )
     ''');
-  }
-
-  Future<int> insertUser(Map<String, dynamic> row) async {
-    Database db = await database;
-    return await db.insert('users', row);
+    await db.execute('''
+      CREATE TABLE user_meta (
+        id INTEGER PRIMARY KEY,
+        current_user_id INTEGER
+      )
+    ''');
+    await db.insert('user_meta', {'id': 1, 'current_user_id': 0});
   }
 
   Future<List<Map<String, dynamic>>> queryAllUsers() async {
-    Database db = await database;
+    final db = await database;
     return await db.query('users');
+  }
+
+  Future<int> insertUser(Map<String, dynamic> user) async {
+    final db = await database;
+    int currentUserId = await _getCurrentUserId();
+    user['user_id'] = currentUserId + 1;
+    await _updateCurrentUserId(user['user_id']);
+    return await db.insert('users', user);
+  }
+
+  Future<int> _getCurrentUserId() async {
+    final db = await database;
+    List<Map<String, dynamic>> result = await db.query('user_meta', where: 'id = ?', whereArgs: [1]);
+    return result.first['current_user_id'];
+  }
+
+  Future<void> _updateCurrentUserId(int newUserId) async {
+    final db = await database;
+    await db.update('user_meta', {'current_user_id': newUserId}, where: 'id = ?', whereArgs: [1]);
   }
 }
