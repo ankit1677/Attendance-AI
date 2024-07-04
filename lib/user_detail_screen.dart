@@ -18,6 +18,7 @@ class UserDetailScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text('User ID: ${user['user_id']}'),
               Text('Name: ${user['name']}'),
               Text('Father\'s Name: ${user['father_name']}'),
               Text('Address: ${user['address']}'),

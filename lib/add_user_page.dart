@@ -22,6 +22,13 @@ class AddUserPageState extends State<AddUserPage> {
   String? _facePhotoPath;
   String? _idFrontPhotoPath;
   String? _idBackPhotoPath;
+  int _nextUserId = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchNextUserId();
+  }
 
   @override
   void dispose() {
@@ -32,6 +39,15 @@ class AddUserPageState extends State<AddUserPage> {
     _phoneController.dispose();
     _groupIdController.dispose();
     super.dispose();
+  }
+
+  Future<void> _fetchNextUserId() async {
+    int nextUserId = await DatabaseHelper().getCurrentUserId() + 1;
+    if (mounted) {
+      setState(() {
+        _nextUserId = nextUserId;
+      });
+    }
   }
 
   Future<void> _navigateToCameraScreen(BuildContext context, String imageType) async {
@@ -82,6 +98,7 @@ class AddUserPageState extends State<AddUserPage> {
     }
 
     Map<String, dynamic> user = {
+      'user_id': _nextUserId,
       'name': _nameController.text,
       'father_name': _fatherNameController.text,
       'address': _addressController.text,
@@ -118,6 +135,7 @@ class AddUserPageState extends State<AddUserPage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
+            Text('User ID: $_nextUserId'),
             TextField(
               controller: _nameController,
               decoration: const InputDecoration(labelText: 'Name'),

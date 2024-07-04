@@ -1,7 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
-
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   factory DatabaseHelper() => _instance;
@@ -58,13 +57,13 @@ class DatabaseHelper {
 
   Future<int> insertUser(Map<String, dynamic> user) async {
     final db = await database;
-    int currentUserId = await _getCurrentUserId();
+    int currentUserId = await getCurrentUserId();
     user['user_id'] = currentUserId + 1;
     await _updateCurrentUserId(user['user_id']);
     return await db.insert('users', user);
   }
 
-  Future<int> _getCurrentUserId() async {
+  Future<int> getCurrentUserId() async {
     final db = await database;
     List<Map<String, dynamic>> result = await db.query('user_meta', where: 'id = ?', whereArgs: [1]);
     return result.first['current_user_id'];
