@@ -65,12 +65,14 @@ class DatabaseHelper {
 
   Future<int> getCurrentUserId() async {
     final db = await database;
-    List<Map<String, dynamic>> result = await db.query('user_meta', where: 'id = ?', whereArgs: [1]);
+    List<Map<String, dynamic>> result =
+        await db.query('user_meta', where: 'id = ?', whereArgs: [1]);
     return result.first['current_user_id'];
   }
 
   Future<void> _updateCurrentUserId(int newUserId) async {
     final db = await database;
-    await db.update('user_meta', {'current_user_id': newUserId}, where: 'id = ?', whereArgs: [1]);
+    await db.update('user_meta', {'current_user_id': newUserId},
+        where: 'id = ?', whereArgs: [1]);
   }
 }
